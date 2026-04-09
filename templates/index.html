@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi Music Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0a0a; }
+        .card { background: #1a1a1a; }
+    </style>
+</head>
+<body class="min-h-screen text-white flex items-center justify-center p-4">
+    <div class="w-full max-w-lg mx-auto">
+        <div class="card rounded-3xl shadow-2xl p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-red-500 mb-2">🎵 Multi Downloader</h1>
+                <p class="text-gray-400">YouTube Playlist • Spotify • JioSaavn</p>
+                <p class="text-sm text-green-400 mt-1">No Ads • No Limits • Mobile Friendly</p>
+            </div>
+
+            <form id="downloadForm" class="space-y-6">
+                <div>
+                    <input 
+                        type="text" 
+                        id="url" 
+                        name="url" 
+                        placeholder="Paste YouTube / Spotify / JioSaavn link here..."
+                        class="w-full bg-gray-900 border border-gray-700 focus:border-red-500 rounded-2xl px-6 py-5 text-lg outline-none transition-all"
+                        required>
+                </div>
+                <button 
+                    type="submit"
+                    class="w-full bg-red-600 hover:bg-red-700 transition-all font-semibold text-xl py-5 rounded-2xl active:scale-95">
+                    ▶️ Download MP3 Now
+                </button>
+            </form>
+
+            <div id="status" class="mt-8 min-h-[100px] text-center text-sm"></div>
+
+            <div class="mt-10 grid grid-cols-3 gap-3 text-center text-xs">
+                <div class="bg-gray-900 p-3 rounded-2xl">✅ YouTube</div>
+                <div class="bg-gray-900 p-3 rounded-2xl">✅ Spotify</div>
+                <div class="bg-gray-900 p-3 rounded-2xl">✅ JioSaavn</div>
+            </div>
+        </div>
+
+        <p class="text-center text-gray-500 text-xs mt-8">Self-hosted • Personal Use Only</p>
+    </div>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlInput = document.getElementById('url');
+            const statusDiv = document.getElementById('status');
+            
+            statusDiv.innerHTML = `
+                <div class="animate-pulse text-yellow-400">
+                    Processing your link...<br>
+                    <span class="text-xs">(Large playlists take time)</span>
+                </div>`;
+
+            const formData = new FormData();
+            formData.append('url', urlInput.value);
+
+            try {
+                const res = await fetch('/download', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.error) {
+                    statusDiv.innerHTML = `<p class="text-red-400">${data.error}</p>`;
+                } else {
+                    statusDiv.innerHTML = `
+                        <p class="text-green-400 font-medium">${data.message}</p>
+                        <p class="text-xs text-gray-400 mt-2">ID: ${data.download_id}</p>
+                    `;
+                    urlInput.value = '';
+                }
+            } catch (err) {
+                statusDiv.innerHTML = `<p class="text-red-400">Network error. Check your connection.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
